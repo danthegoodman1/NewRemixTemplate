@@ -1,4 +1,4 @@
-# StreamDrops
+# NewRemixTemplate
 
 ## Environment set up
 
@@ -89,4 +89,3 @@ You can submit a form as JSON, and it will translate it.
 And loaders (`GET`) should expect `searchParams`, which should still be validated against zod.
 
 For a given page that might have multiple actions. A top-level action can figure out where to send the JSON to, then send to a function to handle that specific action (e.g. an `action` field in the JSON body/form).
-# NewRemixTemplate

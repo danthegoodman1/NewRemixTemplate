@@ -1,0 +1,30 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+/* JetBrains Mono Variable */
+@font-face {
+  font-family: 'JetBrainsMono';
+  font-style: normal;
+  font-weight: 100 900; /* Assuming it's a variable font with a range */
+  font-display: swap;
+  src: url('fonts/JetBrainsMonoVariable.ttf');
+}
+
+@font-face {
+  font-family: 'GeneralSans';
+  font-style: normal;
+  font-weight: 100 900; /* Assuming it's a variable font with a range */
+  font-display: swap;
+  src: url('fonts/GeneralSans-Variable.ttf');
+}
+
+/* General Sans Variable Italic */
+@font-face {
+  font-family: 'GeneralSans';
+  font-style: italic;
+  font-weight: 100 900; /* Assuming it's a variable font with a range */
+  font-display: swap;
+  src: url('fonts/GeneralSans-VariableItalic.ttf');
+}

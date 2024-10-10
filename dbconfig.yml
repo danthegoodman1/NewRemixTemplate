@@ -1,0 +1,17 @@
+local:
+  dialect: postgres
+  datasource: dbname=postgres sslmode=disable host=localhost port=5432 user=root
+  dir: migrations
+  table: migrations
+
+development:
+  dialect: postgres
+  datasource: dbname=streamerdrops sslmode=verify-full host=tbd port=5432 user=${CRDB_USER} password=${CRDB_PASSWORD} sslrootcert=staging.crt
+  dir: migrations
+  table: migrations
+
+production:
+  dialect: postgres
+  datasource: dbname=streamerdrops sslmode=verify-full host=tbd port=5432 user=${CRDB_USER} password=${CRDB_PASSWORD} sslrootcert=prod.crt
+  dir: migrations
+  table: migrations
