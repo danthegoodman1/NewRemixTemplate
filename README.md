@@ -59,6 +59,8 @@ You also may _never_ call (or wait for calls) to external services within a tran
 
 Transactional functions should expect that the data being passed in is valid, e.g. it has already been checked with zod.
 
+Use [`sql-migrate`](https://github.com/rubenv/sql-migrate) for migrations.
+
 ### Types and transactional functions
 
 Types and transactional functions should always be separated out into separate files. This is because we want to ensure that the transactional functions never make it to the client bundle by using the `.server.ts` suffix, but we still want the types to be accessible by the client.
