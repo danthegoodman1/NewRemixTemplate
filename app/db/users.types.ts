@@ -1,4 +1,5 @@
 import { z } from "zod"
+import { refreshToken } from "~/auth/google.server"
 
 /**
  * Emails are the primary mechanism for identifying users, but they also have unique IDs
@@ -13,10 +14,18 @@ export const UserRow = z.object({
   slug: z.string().optional(),
   email: z.string().email(),
   name: z.string(),
-  scopes: z.string(),
+  /**
+   * Key value of platform to auth info
+   */
+  auth: z.record(
+    z.string(),
+    z.object({
+      refreshToken: z.string(),
+      scopes: z.array(z.string()),
+      id: z.string().optional(),
+    })
+  ),
   created_ms: z.string(),
-  refresh_token: z.string().optional(),
-  platform: z.enum(["twitch", "google"]),
 })
 
 export type UserRow = z.infer<typeof UserRow>

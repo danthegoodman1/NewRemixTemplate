@@ -9,48 +9,60 @@ export async function createOrGetUser(
   conn: PoolClient,
   email: string,
   name: string,
-  platform: "twitch" | "google",
-  scopes: string[],
-  refreshToken?: string
+  authData: {
+    platform: string
+    scopes: string[]
+    refreshToken?: string
+    id?: string
+  }
 ): Promise<UserRow> {
   try {
-    // Update the scopes and platforms if the user already exists
-    const result = await conn.query<UserRow>(
-      `UPDATE users
-       SET ${platform === "twitch" ? "twitch_scopes" : "google_scopes"} = $1,
-           platforms = CASE
-             WHEN NOT $2 = ANY(platforms) THEN array_append(platforms, $2)
-             ELSE platforms
-           END,
-           refresh_token = COALESCE($3, refresh_token)
-       WHERE email = $4
-       RETURNING *`,
-      [scopes, platform, refreshToken, email]
+    // First, try to select the existing user
+    const selectResult = await conn.query<UserRow>(
+      `SELECT * FROM users WHERE email = $1`,
+      [email]
     )
-    let user = result.rows.length > 0 ? result.rows[0] : undefined
 
-    if (!user) {
+    let user: UserRow | undefined
+    if (selectResult.rows.length > 0) {
+      user = selectResult.rows[0]
+      // User exists, update the auth
+      const updatedAuth = {
+        ...user.auth,
+        [authData.platform]: {
+          refreshToken: authData.refreshToken,
+          scopes: authData.scopes,
+          id: authData.id,
+        },
+      }
+
+      const updateResult = await conn.query<UserRow>(
+        `UPDATE users
+         SET auth = $1
+         WHERE email = $2
+         RETURNING *`,
+        [JSON.stringify(updatedAuth), email]
+      )
+      user = updateResult.rows[0]
+    } else {
+      // User doesn't exist, create a new one
       const id = randomUUID()
-      user = (
-        await conn.query<UserRow>(
-          `INSERT INTO users (
-             id, email, name, created_ms, refresh_token,
-             ${platform === "twitch" ? "twitch_scopes" : "google_scopes"},
-             platforms
-           )
-           VALUES ($1, $2, $3, $4, $5, $6, $7)
-           RETURNING *`,
-          [
-            id,
-            email,
-            name,
-            new Date().getTime(),
-            refreshToken,
-            scopes,
-            [platform],
-          ]
-        )
-      ).rows[0]
+      const newAuth = {
+        [authData.platform]: {
+          refreshToken: authData.refreshToken,
+          scopes: authData.scopes,
+          id: authData.id,
+        },
+      }
+      const insertResult = await conn.query<UserRow>(
+        `INSERT INTO users (
+           id, email, name, created_ms, auth
+         )
+         VALUES ($1, $2, $3, $4, $5)
+         RETURNING *`,
+        [id, email, name, new Date().getTime(), JSON.stringify(newAuth)]
+      )
+      user = insertResult.rows[0]
     }
 
     // TODO: background launch any user creation jobs (deduped)

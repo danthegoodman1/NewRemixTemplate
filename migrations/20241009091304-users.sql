@@ -6,16 +6,12 @@ create table users (
   name text not null,
   email text unique not null,
 
-  google_scopes text[] default '{}',
-  twitch_scopes text[] default '{}',
-  refresh_token text,
-
-  platforms text[] not null,
+  auth jsonb not null default '{}'::jsonb,
 
   created_ms int8 not null,
 
   primary key (id)
-) strict without rowid
+)
 ;
 create index on users (email);
 create index on users (slug) where slug is not null;

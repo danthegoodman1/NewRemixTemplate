@@ -13,7 +13,7 @@ import inTransaction from "~/db/transactional.server"
 import { UserRow } from "~/db/users.types"
 
 // export the whole sessionStorage object
-export let sessionStorage = createCookieSessionStorage({
+export const sessionStorage = createCookieSessionStorage({
   cookie: {
     name: "_session",
     sameSite: "lax",
@@ -28,21 +28,22 @@ export let sessionStorage = createCookieSessionStorage({
 export interface AuthSession {
   id: string
   email: string
-  scopes: string
+  auth: Omit<UserRow["auth"], "refreshToken">
   name: string
 }
 
-export let authenticator = new Authenticator<AuthSession>(sessionStorage)
+export const authenticator = new Authenticator<AuthSession>(sessionStorage)
 
 export const googleAuth = "google"
 
-let secret = process.env.COOKIE_SECRET
+const secret = process.env.COOKIE_SECRET
 if (!secret) throw new Error("Missing COOKIE_SECRET env variable.")
 
 const googleScopes = [
   "openid",
   "https://www.googleapis.com/auth/userinfo.profile",
   "https://www.googleapis.com/auth/userinfo.email",
+  "https://www.googleapis.com/auth/youtube.readonly",
 ]
 
 authenticator.use(
@@ -71,9 +72,11 @@ authenticator.use(
             conn,
             profile.emails[0].value,
             profile.displayName,
-            "google",
-            googleScopes,
-            refreshToken
+            {
+              platform: "youtube",
+              scopes: googleScopes,
+              refreshToken: refreshToken,
+            }
           )
         })
 
@@ -81,18 +84,20 @@ authenticator.use(
         if (!user)
           throw new Error("User not created or found THIS SHOULD NOT HAPPEN")
 
+        delete (user.auth["youtube"] as any).refreshToken
+
         return {
           email: user.email,
           name: user.name,
           id: user.id,
-          scopes: user.scopes,
+          auth: user.auth,
         } as AuthSession
       } catch (error) {
         logger.error(
           {
             err: extractError(error),
           },
-          "error in createOrGetUser"
+          "error handling google auth"
         )
         throw error
       }
@@ -131,17 +136,17 @@ authenticator.use(
           process.env.TWITCH_CLIENT_ID!
         )
 
-        logger.debug(twitchUser, "got twitchuser")
-
         let user: UserRow | undefined
         await inTransaction(async (conn) => {
           user = await createOrGetUser(
             conn,
             twitchUser.email,
             twitchUser.login,
-            "twitch",
-            scopes || [],
-            tokens.refresh_token
+            {
+              platform: "twitch",
+              scopes: scopes || [],
+              refreshToken: tokens.refresh_token,
+            }
           )
         })
 
@@ -149,18 +154,20 @@ authenticator.use(
         if (!user)
           throw new Error("User not created or found THIS SHOULD NOT HAPPEN")
 
+        delete (user.auth["twitch"] as any).refreshToken
+
         return {
           email: user.email,
           id: user.id,
-          scopes: user.scopes,
+          auth: user.auth,
           name: user.name,
         } as AuthSession
       } catch (error) {
         logger.error(
           {
-            err: extractError(error),
+            err: error,
           },
-          "error in createOrGetUser"
+          "error handling twitch auth"
         )
         throw error
       }
