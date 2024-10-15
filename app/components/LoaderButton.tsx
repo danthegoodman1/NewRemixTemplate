@@ -5,13 +5,15 @@ import { Spinner } from "./Spinner"
 const buttonStates = ["idle", "loading", "success", "error"]
 type ButtonState = (typeof buttonStates)[number]
 
-// The only reason we do props expansion here is because we need to for the button props inheritance
+// The only reason we do props expansion here, is because we need to for the button props inheritance
+
+// Also, once you put your text in, pin the button height so the loader doesn't make it jump
 
 export default function LoaderButton(
   props: {
     children: React.ReactNode
     loading: boolean
-    onClick: () => Promise<void>
+    onClick?: () => Promise<void>
     spinnerColor?: string
     spinnerSize?: number
     /**
@@ -28,22 +30,24 @@ export default function LoaderButton(
       {...props}
       className={`overflow-hidden relative ${props.className}`}
       onClick={async (e) => {
-        e.preventDefault()
-        setButtonState("loading")
-        try {
-          await props.onClick()
-          setButtonState(props.successMessage ? "success" : "idle")
-          if (props.successMessage) {
-            setTimeout(
-              () => setButtonState("idle"),
-              props.successMessageDuration ?? 2000
-            )
+        if (props.onClick) {
+          e.preventDefault()
+          setButtonState("loading")
+          try {
+            await props.onClick()
+            setButtonState(props.successMessage ? "success" : "idle")
+            if (props.successMessage) {
+              setTimeout(
+                () => setButtonState("idle"),
+                props.successMessageDuration ?? 2000
+              )
+            }
+          } catch (error) {
+            setButtonState("error")
           }
-        } catch (error) {
-          setButtonState("error")
         }
       }}
-      disabled={buttonState !== "idle" || props.disabled}
+      disabled={buttonState !== "idle" || props.disabled || props.loading}
     >
       <AnimatePresence initial={false} mode="popLayout">
         <motion.span
@@ -54,7 +58,7 @@ export default function LoaderButton(
           animate={{ opacity: 1, y: 0 }}
           className="w-full flex justify-center items-center"
         >
-          {buttonState === "loading" ? (
+          {buttonState === "loading" || props.loading ? (
             <Spinner
               color={props.spinnerColor ?? "rgba(255, 255, 255, 0.65)"}
               size={props.spinnerSize ?? 16}
