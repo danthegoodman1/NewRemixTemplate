@@ -69,7 +69,7 @@ export default function SignInDialog(props: { open: boolean }) {
             <div className="absolute top-[18px] left-1/2 transform -translate-x-1/2">
               <Drawer.Handle className="!w-[60px] !bg-gray-300" />
             </div>
-            {content}
+            <div className="overflow-y-auto h-full">{content}</div>
           </Drawer.Content>
         </Drawer.Portal>
       </Drawer.Root>
