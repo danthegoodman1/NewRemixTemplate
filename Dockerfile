@@ -27,7 +27,7 @@ RUN npm run build
 FROM base AS release
 
 COPY --from=install /temp/prod/node_modules node_modules
-COPY --from=prerelease /app/src ./src
+COPY --from=prerelease /app/app ./app
 COPY --from=prerelease /app/build ./build
 COPY --from=prerelease /app/public ./public
 COPY . .
