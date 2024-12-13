@@ -9,7 +9,7 @@ import { createOrGetUser, selectUserById } from "app/db/users.server"
 import { RowsNotFound } from "app/db/errors"
 import { OAuth2Strategy } from "remix-auth-oauth2"
 import { getTwitchUser } from "./twitch"
-import inTransaction from "~/db/transactional.server"
+import { inTransaction } from "~/db/transactional.server"
 import { UserRow } from "~/db/users.types"
 
 // export the whole sessionStorage object
