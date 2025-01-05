@@ -41,8 +41,12 @@ export default async function handleRequest(
   const user = await authenticator.isAuthenticated(request)
   if (user) {
     const currentCacheControl = res.headers.get("cache-control")
-    if (currentCacheControl && !currentCacheControl.includes("immutable")) {
-      // Never override the cache-control header if it already has an 'immutable' directive
+    if (
+      currentCacheControl &&
+      !currentCacheControl.includes("immutable") &&
+      !currentCacheControl.includes("private")
+    ) {
+      // Never override the cache-control header if it already has an 'immutable' or 'private' directive
       res.headers.set("cache-control", "no-store, max-age=0")
     }
   }
