@@ -2,7 +2,23 @@ import { useEffect, useState } from "react"
 import { AuthSession } from "~/auth/authenticator"
 
 /**
- * Use like:
+ * ### In the loader
+ *
+ * ```
+ * const session = await sessionStorage.getSession(request.headers.get('Cookie'));
+ *
+ * session.set('time', {
+ * 	value: new Date().toISOString(),
+ * });
+ *
+ * return new Response(null, {
+ * 	headers: {
+ * 		'Set-Cookie': await sessionStorage.commitSession(session),
+ * 	},
+ * });
+ * ```
+ *
+ * ### Then in the client:
  *
  * ```
  * type Session = {
@@ -16,7 +32,6 @@ import { AuthSession } from "~/auth/authenticator"
  * }
  * ```
  */
-
 export function useSession<
   T extends { user: AuthSession } = { user: AuthSession }
 >() {
