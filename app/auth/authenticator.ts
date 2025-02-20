@@ -33,6 +33,7 @@ export interface AuthSession {
 }
 
 export const authenticator = new Authenticator<AuthSession>(sessionStorage)
+export const impersonationKey = "impersonation"
 
 export const googleAuth = "google"
 
