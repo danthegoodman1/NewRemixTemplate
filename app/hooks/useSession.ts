@@ -33,7 +33,10 @@ import { AuthSession } from "~/auth/authenticator"
  * ```
  */
 export function useSession<
-  T extends { user: AuthSession } = { user: AuthSession }
+  T extends { user: AuthSession; impersonation?: AuthSession } = {
+    user: AuthSession
+    impersonation?: AuthSession
+  }
 >() {
   const [session, setSession] = useState<T | null>(null)
 
