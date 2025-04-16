@@ -3,7 +3,7 @@ import { pool } from "./db.server"
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
-export default async function inTransaction<T>(
+export async function inTransaction<T>(
   fn: (conn: PoolClient) => Promise<T>
 ): Promise<T> {
   const conn = await pool.connect()

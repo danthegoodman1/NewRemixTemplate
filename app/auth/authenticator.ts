@@ -22,6 +22,7 @@ export const sessionStorage = createCookieSessionStorage({
     secrets: [process.env.COOKIE_SECRET!],
     secure: process.env.NODE_ENV === "production", // enable this in prod only
     maxAge: 3600 * 24 * 14, // 2 weeks
+    partitioned: true,
   },
 })
 
